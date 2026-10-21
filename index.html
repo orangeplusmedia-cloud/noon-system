@@ -1,0 +1,470 @@
+﻿<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      مدرسة الأخوّة الابتدائية - نظام الإدارة ورصد العلامات والاستعلام
+    </title>
+    <!-- خط المسيري من Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- مكتبة SheetJS لتصدير ملفات Excel بصيغة XLSX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- ربط ملف التصميم CSS -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- قائمة التقديرات المتاحة للإدخال السريع -->
+    <datalist id="estimations-list">
+      <option value="ممتاز"></option>
+      <option value="جيد جداً"></option>
+      <option value="جيد"></option>
+      <option value="متوسط"></option>
+      <option value="ضعيف"></option>
+    </datalist>
+
+    <!-- شريط التنقل العلوي -->
+    <header id="main-header" class="hidden">
+      <div class="header-container">
+        <!-- القسم الأيمن: الشعار وزر القائمة -->
+        <div class="top-mobile-bar">
+          <img
+            src="logo.png"
+            alt="شعار مدرسة الأخوّة الابتدائية"
+            class="header-logo"
+            onerror="
+              this.style.display = 'none';
+              document.getElementById('fallback-header-logo').style.display =
+                'flex';
+            "
+          />
+          <div
+            id="fallback-header-logo"
+            class="fallback-logo-sm"
+            style="display: none"
+          ></div>
+
+          <!-- زر القائمة الجانبية (يظهر فقط في الجوال على الشمال) -->
+          <button id="menu-toggle-btn" class="menu-toggle">☰</button>
+        </div>
+
+        <!-- القائمة الجانبية (تحوي باقي المعلومات) -->
+        <div id="side-menu" class="side-menu-wrapper">
+          <div class="school-titles">
+            <h1>مدرسة الأخوّة الابتدائية</h1>
+            <span>البوابة الإلكترونية لرصد العلامات</span>
+          </div>
+
+          <div class="user-area">
+            <span id="welcome-user">مرحباً</span>
+            <span id="user-role-badge" class="role-badge">الصلاحية</span>
+            <span id="save-status" class="save-badge"
+              >✓ قاعدة البيانات متصلة</span
+            >
+            <!-- زر خاص بالمدير في القائمة الجانبية لفتح صفحة لوحة المدير المستقلة -->
+            <button id="nav-admin-panel-btn" class="btn btn-cyan btn-sm hidden">
+              👑 لوحة تحكم المدير
+            </button>
+            <button id="logout-btn" class="btn btn-danger btn-sm">
+              تسجيل الخروج
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- خلفية معتمة تظهر عند فتح القائمة -->
+      <div id="menu-overlay" class="menu-overlay"></div>
+    </header>
+
+    <!-- ==========================================
+         1. الصفحة الأولى: تسجيل الدخول (مدير / معلم / طالب)
+    =========================================== -->
+    <section id="login-page" class="page-section">
+      <div class="login-container-grid">
+        <!-- بطاقة دخول الطاقم (مدير ومعلمون) -->
+        <div class="login-card">
+          <div class="login-header">
+            <div class="logo-wrapper">
+              <img
+                src="logo.png"
+                alt="شعار مدرسة الأخوّة الابتدائية"
+                class="login-logo-img"
+                onerror="
+                  this.style.display = 'none';
+                  document.getElementById('fallback-login-svg').style.display =
+                    'block';
+                "
+              />
+              <svg
+                id="fallback-login-svg"
+                style="display: none"
+                width="110"
+                height="100"
+                viewBox="0 0 200 180"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="100"
+                  cy="95"
+                  r="78"
+                  fill="none"
+                  stroke="#005288"
+                  stroke-width="3"
+                  stroke-dasharray="180 15"
+                />
+                <path
+                  d="M100 140 C70 120 35 125 15 135 C30 105 60 105 100 130 Z"
+                  fill="#005288"
+                />
+                <path
+                  d="M100 140 C130 120 165 125 185 135 C170 105 140 105 100 130 Z"
+                  fill="#005288"
+                />
+                <path
+                  d="M100 132 C72 100 45 92 25 98 C42 75 72 82 100 120 Z"
+                  fill="#00A8CF"
+                />
+                <path
+                  d="M100 132 C128 100 155 92 175 98 C158 75 128 82 100 120 Z"
+                  fill="#00A8CF"
+                />
+                <path
+                  d="M100 95 C88 65 95 35 120 20 C112 45 115 70 100 95 Z"
+                  fill="#005288"
+                />
+                <rect
+                  x="94"
+                  y="96"
+                  width="12"
+                  height="10"
+                  rx="2"
+                  fill="#005288"
+                />
+              </svg>
+            </div>
+
+            <h3>بــوابة الكـادر التعـليمـي</h3>
+            <p>تسجيل دخول المدير أو المعلمين</p>
+          </div>
+
+          <form id="login-form">
+            <div class="form-group">
+              <label for="login-username">اسم المستخدم</label>
+              <input
+                type="text"
+                id="login-username"
+                placeholder="أدخل اسم المستخدم..."
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="login-password">كلمة السر</label>
+              <input
+                type="password"
+                id="login-password"
+                placeholder="أدخل كلمة السر..."
+                required
+              />
+            </div>
+
+            <div id="login-error" class="error-msg hidden">
+              اسم المستخدم أو كلمة السر غير صحيحة!
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+              دخول إلى النظام
+            </button>
+          </form>
+
+          <!-- قسم استعلامات الطلاب-->
+          <div class="login-header" style="margin-top: 30px">
+            <h3>-</h3>
+            <h2>استعلام نتائج الطلاب</h2>
+            <p>أدخل الكود الخاص بك للاطلاع على درجاتك</p>
+          </div>
+
+          <form id="student-search-form">
+            <div class="form-group">
+              <label for="student-code-input">كود الطالب الشخصي</label>
+              <input
+                type="text"
+                id="student-code-input"
+                placeholder="مثال: ST101"
+                required
+              />
+            </div>
+
+            <div id="student-search-error" class="error-msg hidden">
+              عذراً، كود الطالب غير موجود! التأكد من الكود المدخل.
+            </div>
+
+            <button type="submit" class="btn btn-cyan btn-block">
+              عرض نتيجتي الدراسية
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         2. الصفحة الثانية: قائمة الصفوف الدراسية
+    =========================================== -->
+    <section id="classes-page" class="page-section hidden">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <h2>قائمة الصفوف والشعب الدراسية</h2>
+            <p>اختر الصف والشعبة لعرض كشوف الطلاب ورصد العلامات والتقديرات</p>
+          </div>
+        </div>
+
+        <div id="classes-grid" class="classes-grid"></div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         3. الصفحة الثالثة: لوحة تحكم المدير المستقلة (تفتح من القائمة الجانبية)
+    =========================================== -->
+    <section id="admin-dashboard-page" class="page-section hidden">
+      <div class="container">
+        <div class="section-header">
+          <div class="class-title-wrap">
+            <button id="back-from-admin-btn" class="btn btn-secondary">
+              ← العودة إلى الصفوف
+            </button>
+            <div>
+              <h2>👑 لوحة الصلاحيات الشاملة لمدير المدرسة</h2>
+              <p>إدارة الصفوف، المعلمين، تخصيص المواد، وتصدير البيانات</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="admin-only-panel" class="admin-panel">
+          <div class="admin-panel-header">
+            <div>
+              <h3>إجراءات قاعدة البيانات والتحكم العام</h3>
+              <p>تصدير النتائج، تصفير العلامات، وإعادة ضبط المصنع</p>
+            </div>
+            <div class="db-actions">
+              <button id="export-all-xlsx-btn" class="btn btn-excel">
+                📊 تصدير جميع النتائج (XLSX)
+              </button>
+              <button id="clear-all-grades-btn" class="btn btn-warning">
+                🧹 حذف علامات جميع الصفوف
+              </button>
+              <button id="reset-db-btn" class="btn btn-outline-danger">
+                إعادة ضبط المصنع
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-grid-boxes">
+            <!-- أ. قسم إضافة صفوف وشعب جديدة -->
+            <div class="admin-box">
+              <h4>🏫 إضافة صف أو شعبة جديدة</h4>
+              <form id="add-class-form" class="admin-inline-form">
+                <input
+                  type="text"
+                  id="new-class-name"
+                  placeholder="اسم الصف (مثال: الثامن)"
+                  required
+                />
+                <input
+                  type="text"
+                  id="new-class-section"
+                  placeholder="الشعبة (مثال: أ)"
+                  required
+                />
+                <button type="submit" class="btn btn-cyan">
+                  + إضافة صف/شعبة
+                </button>
+              </form>
+            </div>
+
+            <!-- ب. قسم إدارة حسابات المعلمين وصلاحياتهم وتخصصاتهم -->
+            <div class="admin-box" style="grid-column: span 2">
+              <h4>👨‍🏫 إدارة حسابات المعلمين والصفات وصلاحيات المواد</h4>
+              <form id="add-teacher-form" class="admin-teacher-form-grid">
+                <input
+                  type="text"
+                  id="new-teacher-username"
+                  placeholder="اسم المعلم"
+                  required
+                />
+                <input
+                  type="text"
+                  id="new-teacher-password"
+                  placeholder="كلمة السر"
+                  required
+                />
+                <input
+                  type="text"
+                  id="new-teacher-title"
+                  placeholder="الصفة (مثل: معلم لغة عربية)"
+                  required
+                />
+
+                <!-- قائمة المواد الدراسية كخيارات متعددة -->
+                <div class="form-group" style="grid-column: span 2">
+                  <label
+                    >المواد المسموح له بتعبئة درجاتها (حدد المواد
+                    المطلوبة):</label
+                  >
+                  <div
+                    id="teacher-subjects-checkboxes"
+                    class="subjects-checkbox-container"
+                  >
+                    <!-- يتم تعبئتها برمجياً بناءً على مواد الصفوف -->
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  style="grid-column: span 2"
+                >
+                  + إضافة معلم جديد وتحديد صلاحياته
+                </button>
+              </form>
+              <div id="teachers-list" class="teachers-chips"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         4. الصفحة الرابعة: طلاب الصف ورصد العلامات (للمدير والمعلمين)
+    =========================================== -->
+    <section id="students-page" class="page-section hidden">
+      <div class="container">
+        <div class="section-header">
+          <div class="class-title-wrap">
+            <button id="back-to-classes-btn" class="btn btn-secondary">
+              ← العودة إلى الصفوف
+            </button>
+            <div>
+              <h2 id="current-class-title">الصف الأول</h2>
+              <p id="current-class-subtitle">
+                جدول أسماء الطلاب ورصد العلامات والتقديرات
+              </p>
+            </div>
+          </div>
+
+          <div class="class-page-actions">
+            <button id="export-class-xlsx-btn" class="btn btn-excel hidden">
+              📊 تصدير هذا الصف (XLSX)
+            </button>
+
+            <!-- نموذج إضافة طالب مع كود (خاص بالمدير فقط) -->
+            <form id="add-student-form" class="add-student-bar hidden">
+              <input
+                type="text"
+                id="new-student-name"
+                placeholder="اسم الطالب الثلاثي..."
+                required
+              />
+              <input
+                type="text"
+                id="new-student-code"
+                placeholder="الكود التعريفي (مثال: ST105)"
+                required
+              />
+              <button type="submit" class="btn btn-cyan">
+                + إضافة طالب بالكود
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- أداة تحكم المدير بإدارة مواد هذا الصف -->
+        <div id="admin-class-subjects-panel" class="admin-subjects-bar hidden">
+          <h4>📚 تخصيص مواد هذا الصف:</h4>
+          <div id="class-subjects-chips" class="subjects-chips-container"></div>
+          <form id="add-class-subject-form" class="add-sub-inline">
+            <input
+              type="text"
+              id="new-subject-name"
+              placeholder="اسم المادة الجديدة..."
+              required
+            />
+            <button type="submit" class="btn btn-primary btn-sm">
+              + إضافة مادة للصف
+            </button>
+          </form>
+        </div>
+
+        <!-- جدول الطلاب والعلامات -->
+        <div class="table-responsive">
+          <table class="grades-table">
+            <thead>
+              <tr id="table-headers-row"></tr>
+            </thead>
+            <tbody id="students-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         5. صفحة عرض نتيجة الطالب الفردية (للطالب عبر البحث بالكود)
+    =========================================== -->
+    <section id="student-report-page" class="page-section hidden">
+      <div class="container report-container">
+        <div class="section-header report-header-bar">
+          <button id="back-to-login-btn" class="btn btn-secondary">
+            ← تسجيل الخروج / العودة
+          </button>
+          <h2>شهادة علامات الطالب الإلكترونية</h2>
+        </div>
+
+        <div class="report-card">
+          <div class="report-school-info">
+            <img
+              src="logo.png"
+              alt="شعار المدرسة"
+              class="report-logo"
+              onerror="this.style.display = 'none'"
+            />
+            <h3>مدرسة الأخوّة الابتدائية</h3>
+            <p>تقرير الدرجات والتقديرات والفصل الدراسي</p>
+          </div>
+
+          <div class="student-info-grid">
+            <div><span>اسم الطالب:</span> <b id="rep-student-name">--</b></div>
+            <div>
+              <span>الكود التعريفي:</span> <b id="rep-student-code">--</b>
+            </div>
+            <div>
+              <span>الصف والشعبة:</span> <b id="rep-student-class">--</b>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="grades-table report-table">
+              <thead>
+                <tr>
+                  <th>المادة الدراسية</th>
+                  <th>الدرجة / التقدير المرصود</th>
+                </tr>
+              </thead>
+              <tbody id="report-grades-tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="report-summary-box">
+            <div>مجموع النقاط: <span id="rep-total">--</span></div>
+            <div>المعدل المئوي العام: <span id="rep-avg">--</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ربط ملف البرمجة وجافاسكريبت -->
+    <script src="script.js"></script>
+  </body>
+</html>
