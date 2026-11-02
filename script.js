@@ -194,42 +194,60 @@ const defaultDatabase = {
   })),
 };
 
-function loadDatabase() {
-  const saved = localStorage.getItem(DB_KEY);
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    parsed.classes.forEach((cls, cIdx) => {
-      if (!cls.subjects)
-        cls.subjects = [...defaultDatabase.classes[0].subjects];
-      cls.students.forEach((st, sIdx) => {
-        if (!st.code) st.code = `ST${cIdx + 1}0${sIdx + 1}`;
-      });
-    });
-    parsed.users.forEach((u) => {
-      if (!u.title) u.title = u.role === "admin" ? "مدير المدرسة" : "معلم";
-      if (!u.allowedSubjects) u.allowedSubjects = [];
-    });
-    return parsed;
-  } else {
-    localStorage.setItem(DB_KEY, JSON.stringify(defaultDatabase));
-    return JSON.parse(JSON.stringify(defaultDatabase));
-  }
-}
+// 1. إعدادات فايربيس الخاصة بمشروعك (انسخها من إعدادات المشروع)
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://console.firebase.google.com/project/al-ukhuwah-school/database/al-ukhuwah-school-default-rtdb/data/~2F",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
 
+// 2. تهيئة الاتصال بقاعدة البيانات
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+// 3. تعريف المتغيرات الأساسية لتكون فارغة في البداية
+let db = null; 
+let currentUser = null;
+let selectedClassId = null;
+
+// 4. دالة الحفظ الجديدة (ترسل البيانات إلى السيرفر)
 function saveDatabase() {
-  localStorage.setItem(DB_KEY, JSON.stringify(db));
-  showSaveIndicator();
+  database.ref('school_data').set(db)
+    .then(() => showSaveIndicator())
+    .catch((error) => console.error("حدث خطأ أثناء الحفظ:", error));
 }
 
-function showSaveIndicator() {
-  const badge = document.getElementById("save-status");
-  badge.textContent = "⏳ جاري الحفظ...";
-  setTimeout(() => {
-    badge.textContent = "✓ تم الحفظ في قاعدة البيانات";
-  }, 300);
+// 5. دالة جلب البيانات والمزامنة اللحظية (Realtime Sync)
+function initApp() {
+  // هذه الدالة on() تستمع لأي تغيير يحدث في قاعدة البيانات من أي مستخدم
+  database.ref('school_data').on('value', (snapshot) => {
+    const data = snapshot.val();
+
+    if (data) {
+      db = data;
+      // تحديث الواجهة فوراً إذا كان المستخدم داخل لوحة التحكم
+      if (currentUser) {
+        if (!document.getElementById("classes-page").classList.contains("hidden")) {
+            renderClassesList();
+        }
+        if (selectedClassId && !document.getElementById("students-page").classList.contains("hidden")) {
+            renderStudentsTable();
+        }
+      }
+    } else {
+      // إذا كانت القاعدة فارغة (أول تشغيل للموقع)، نرفع البيانات الافتراضية
+      db = JSON.parse(JSON.stringify(defaultDatabase));
+      saveDatabase();
+    }
+  });
 }
 
-let db = loadDatabase();
+// بدء تشغيل النظام وجلب البيانات
+initApp();
 let currentUser = null;
 let selectedClassId = null;
 
