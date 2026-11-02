@@ -1112,7 +1112,7 @@ function renderStudentReportSelector() {
   const selector = document.getElementById("student-report-archive-selector");
   if (!selector) return;
   
-  selector.innerHTML = `<option value="current">نتائج الفصل الحالي</option>`;
+  selector.innerHTML = `<option value="current">نتائج السابقة</option>`;
   
   if (db.archives && db.archives.length > 0) {
     db.archives.forEach(arch => {
