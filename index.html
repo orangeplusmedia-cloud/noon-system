@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
@@ -105,43 +105,13 @@
                 viewBox="0 0 200 180"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <circle
-                  cx="100"
-                  cy="95"
-                  r="78"
-                  fill="none"
-                  stroke="#005288"
-                  stroke-width="3"
-                  stroke-dasharray="180 15"
-                />
-                <path
-                  d="M100 140 C70 120 35 125 15 135 C30 105 60 105 100 130 Z"
-                  fill="#005288"
-                />
-                <path
-                  d="M100 140 C130 120 165 125 185 135 C170 105 140 105 100 130 Z"
-                  fill="#005288"
-                />
-                <path
-                  d="M100 132 C72 100 45 92 25 98 C42 75 72 82 100 120 Z"
-                  fill="#00A8CF"
-                />
-                <path
-                  d="M100 132 C128 100 155 92 175 98 C158 75 128 82 100 120 Z"
-                  fill="#00A8CF"
-                />
-                <path
-                  d="M100 95 C88 65 95 35 120 20 C112 45 115 70 100 95 Z"
-                  fill="#005288"
-                />
-                <rect
-                  x="94"
-                  y="96"
-                  width="12"
-                  height="10"
-                  rx="2"
-                  fill="#005288"
-                />
+                <circle cx="100" cy="95" r="78" fill="none" stroke="#005288" stroke-width="3" stroke-dasharray="180 15"/>
+                <path d="M100 140 C70 120 35 125 15 135 C30 105 60 105 100 130 Z" fill="#005288"/>
+                <path d="M100 140 C130 120 165 125 185 135 C170 105 140 105 100 130 Z" fill="#005288"/>
+                <path d="M100 132 C72 100 45 92 25 98 C42 75 72 82 100 120 Z" fill="#00A8CF"/>
+                <path d="M100 132 C128 100 155 92 175 98 C158 75 128 82 100 120 Z" fill="#00A8CF"/>
+                <path d="M100 95 C88 65 95 35 120 20 C112 45 115 70 100 95 Z" fill="#005288"/>
+                <rect x="94" y="96" width="12" height="10" rx="2" fill="#005288"/>
               </svg>
             </div>
 
@@ -152,22 +122,12 @@
           <form id="login-form">
             <div class="form-group">
               <label for="login-username">اسم المستخدم</label>
-              <input
-                type="text"
-                id="login-username"
-                placeholder="أدخل اسم المستخدم..."
-                required
-              />
+              <input type="text" id="login-username" placeholder="أدخل اسم المستخدم..." required />
             </div>
 
             <div class="form-group">
               <label for="login-password">كلمة السر</label>
-              <input
-                type="password"
-                id="login-password"
-                placeholder="أدخل كلمة السر..."
-                required
-              />
+              <input type="password" id="login-password" placeholder="أدخل كلمة السر..." required />
             </div>
 
             <div id="login-error" class="error-msg hidden">
@@ -189,12 +149,7 @@
           <form id="student-search-form">
             <div class="form-group">
               <label for="student-code-input">كود الطالب الشخصي</label>
-              <input
-                type="text"
-                id="student-code-input"
-                placeholder="مثال: ST101"
-                required
-              />
+              <input type="text" id="student-code-input" placeholder="مثال: ST101" required />
             </div>
 
             <div id="student-search-error" class="error-msg hidden">
@@ -249,6 +204,9 @@
               <p>تصدير النتائج، تصفير العلامات، وإعادة ضبط المصنع</p>
             </div>
             <div class="db-actions">
+              <button id="archive-grades-btn" class="btn btn-primary">
+                🗄️ أرشفة النتائج الحالية
+              </button>
               <button id="export-all-xlsx-btn" class="btn btn-excel">
                 📊 تصدير جميع النتائج (XLSX)
               </button>
@@ -266,18 +224,8 @@
             <div class="admin-box">
               <h4>🏫 إضافة صف أو شعبة جديدة</h4>
               <form id="add-class-form" class="admin-inline-form">
-                <input
-                  type="text"
-                  id="new-class-name"
-                  placeholder="اسم الصف (مثال: الثامن)"
-                  required
-                />
-                <input
-                  type="text"
-                  id="new-class-section"
-                  placeholder="الشعبة (مثال: أ)"
-                  required
-                />
+                <input type="text" id="new-class-name" placeholder="اسم الصف (مثال: الثامن)" required />
+                <input type="text" id="new-class-section" placeholder="الشعبة (مثال: أ)" required />
                 <button type="submit" class="btn btn-cyan">
                   + إضافة صف/شعبة
                 </button>
@@ -288,44 +236,19 @@
             <div class="admin-box" style="grid-column: span 2">
               <h4>👨‍🏫 إدارة حسابات المعلمين والصفات وصلاحيات المواد</h4>
               <form id="add-teacher-form" class="admin-teacher-form-grid">
-                <input
-                  type="text"
-                  id="new-teacher-username"
-                  placeholder="اسم المعلم"
-                  required
-                />
-                <input
-                  type="text"
-                  id="new-teacher-password"
-                  placeholder="كلمة السر"
-                  required
-                />
-                <input
-                  type="text"
-                  id="new-teacher-title"
-                  placeholder="الصفة (مثل: معلم لغة عربية)"
-                  required
-                />
+                <input type="text" id="new-teacher-username" placeholder="اسم المعلم" required />
+                <input type="text" id="new-teacher-password" placeholder="كلمة السر" required />
+                <input type="text" id="new-teacher-title" placeholder="الصفة (مثل: معلم لغة عربية)" required />
 
                 <!-- قائمة المواد الدراسية كخيارات متعددة -->
                 <div class="form-group" style="grid-column: span 2">
-                  <label
-                    >المواد المسموح له بتعبئة درجاتها (حدد المواد
-                    المطلوبة):</label
-                  >
-                  <div
-                    id="teacher-subjects-checkboxes"
-                    class="subjects-checkbox-container"
-                  >
+                  <label>المواد المسموح له بتعبئة درجاتها (حدد المواد المطلوبة):</label>
+                  <div id="teacher-subjects-checkboxes" class="subjects-checkbox-container">
                     <!-- يتم تعبئتها برمجياً بناءً على مواد الصفوف -->
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  style="grid-column: span 2"
-                >
+                <button type="submit" class="btn btn-primary" style="grid-column: span 2">
                   + إضافة معلم جديد وتحديد صلاحياته
                 </button>
               </form>
@@ -351,6 +274,7 @@
               <p id="current-class-subtitle">
                 جدول أسماء الطلاب ورصد العلامات والتقديرات
               </p>
+              <select id="archive-selector" class="archive-dropdown hidden" style="margin-top: 10px;"></select>
             </div>
           </div>
 
@@ -361,18 +285,8 @@
 
             <!-- نموذج إضافة طالب مع كود (خاص بالمدير فقط) -->
             <form id="add-student-form" class="add-student-bar hidden">
-              <input
-                type="text"
-                id="new-student-name"
-                placeholder="اسم الطالب الثلاثي..."
-                required
-              />
-              <input
-                type="text"
-                id="new-student-code"
-                placeholder="الكود التعريفي (مثال: ST105)"
-                required
-              />
+              <input type="text" id="new-student-name" placeholder="اسم الطالب الثلاثي..." required />
+              <input type="text" id="new-student-code" placeholder="الكود التعريفي (مثال: ST105)" required />
               <button type="submit" class="btn btn-cyan">
                 + إضافة طالب بالكود
               </button>
@@ -385,12 +299,7 @@
           <h4>📚 تخصيص مواد هذا الصف:</h4>
           <div id="class-subjects-chips" class="subjects-chips-container"></div>
           <form id="add-class-subject-form" class="add-sub-inline">
-            <input
-              type="text"
-              id="new-subject-name"
-              placeholder="اسم المادة الجديدة..."
-              required
-            />
+            <input type="text" id="new-subject-name" placeholder="اسم المادة الجديدة..." required />
             <button type="submit" class="btn btn-primary btn-sm">
               + إضافة مادة للصف
             </button>
@@ -423,23 +332,18 @@
 
         <div class="report-card">
           <div class="report-school-info">
-            <img
-              src="logo.png"
-              alt="شعار المدرسة"
-              class="report-logo"
-              onerror="this.style.display = 'none'"
-            />
+            <img src="logo.png" alt="شعار المدرسة" class="report-logo" onerror="this.style.display = 'none'" />
             <h3>مدرسة الأخوّة الابتدائية</h3>
             <p>تقرير الدرجات والتقديرات والفصل الدراسي</p>
           </div>
 
           <div class="student-info-grid">
             <div><span>اسم الطالب:</span> <b id="rep-student-name">--</b></div>
+            <div><span>الكود التعريفي:</span> <b id="rep-student-code">--</b></div>
+            <div><span>الصف والشعبة:</span> <b id="rep-student-class">--</b></div>
             <div>
-              <span>الكود التعريفي:</span> <b id="rep-student-code">--</b>
-            </div>
-            <div>
-              <span>الصف والشعبة:</span> <b id="rep-student-class">--</b>
+              <span>الفصل / الأرشيف:</span> 
+              <select id="student-report-archive-selector" class="archive-dropdown"></select>
             </div>
           </div>
 
@@ -462,9 +366,10 @@
         </div>
       </div>
     </section>
-    <!-- مكتبات Firebase (الإصدار 8 التوافقي الأسهل للمشاريع البسيطة) -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <!-- مكتبات Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <!-- ربط ملف البرمجة وجافاسكريبت -->
     <script src="script.js"></script>
