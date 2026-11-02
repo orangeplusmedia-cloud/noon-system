@@ -1418,11 +1418,10 @@ function parseGradeValue(val) {
   if (!isNaN(val)) return Number(val);
 
   const textVal = String(val).trim();
-  if (textVal === "ممتاز") return 95;
-  if (textVal === "جيد جداً" || textVal === "جيد جدا") return 85;
-  if (textVal === "جيد") return 75;
-  if (textVal === "متوسط") return 65;
-  if (textVal === "ضعيف") return 50;
+  if (textVal === "ممتاز") return 0;
+  if (textVal === "جيد جداً" || textVal === "جيد جدا") return 0;
+  if (textVal === "جيد") return 0;
+  if (textVal === "يحتاج إلى متابعة") return 0;
 
   const parsed = Number(textVal);
   return isNaN(parsed) ? 0 : parsed;
