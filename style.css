@@ -130,7 +130,9 @@ body {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  white-space: nowrap;
+  white-space: normal; /* تم التعديل للسماح بنزول النص للأزرار الصغيرة */
+  text-align: center;
+  line-height: 1.4;
 }
 
 .btn-primary {
@@ -693,7 +695,7 @@ body {
   width: 100%;
 }
 
-/* تخصيص شريط التمرير للجدول ليكون احترافياً على الموبايل والديسكتوب */
+/* تخصيص شريط التمرير للجدول */
 .table-responsive::-webkit-scrollbar {
   height: 8px;
 }
@@ -736,11 +738,11 @@ body {
   padding-right: 16px !important;
   font-weight: 700;
   color: var(--brand-navy);
-  position: sticky; /* يثبت العمود عند التمرير */
-  right: 0;
+  position: sticky;
+  right: 0; /* تم التأكد منها لتدعم RTL */
   background-color: #ffffff;
   z-index: 2;
-  border-left: 2px solid #e2f1f8; /* حد فاصل ليوضح أنه ثابت */
+  border-left: 2px solid #e2f1f8;
 }
 
 .grades-table th.student-name-col {
@@ -753,4 +755,367 @@ body {
   background-color: var(--brand-light);
 }
 .grades-table tbody tr:hover .student-name-col {
-  background-color: var(--brand-light); /* ليتوافق اللون عند التمرير
+  background-color: var(--brand-light);
+}
+
+.grade-input {
+  width: 95px;
+  height: 38px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand-navy);
+  border: 1.5px solid var(--border-color);
+  border-radius: 6px;
+  background: #fff;
+  outline: none;
+}
+
+.grade-input:focus {
+  border-color: var(--brand-cyan);
+  background: #f0fbff;
+}
+
+.disabled-grade-input {
+  background: #f1f5f9;
+  color: #94a3b8;
+  border-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.admin-row-actions {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.total-cell {
+  font-weight: 800;
+  color: var(--brand-navy);
+  font-size: 15px;
+}
+
+.avg-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  background: var(--brand-light);
+  color: var(--brand-navy);
+  border: 1px solid var(--brand-cyan);
+}
+
+/* شهادة الطالب الفردية */
+.report-container {
+  max-width: 800px;
+  width: 100%;
+}
+
+.grades-table.report-table {
+  min-width: 100%;
+}
+
+.report-header-bar {
+  background: var(--card-bg);
+}
+
+.report-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0, 82, 136, 0.08);
+  border-top: 5px solid var(--brand-navy);
+  width: 100%;
+}
+
+@media (min-width: 500px) {
+  .report-card {
+    padding: 30px;
+  }
+}
+
+.report-school-info {
+  text-align: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.report-logo {
+  max-width: 65px;
+  margin-bottom: 8px;
+}
+
+.report-school-info h3 {
+  color: var(--brand-navy);
+  font-size: 20px;
+}
+
+.student-info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  background: var(--brand-light);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+@media (min-width: 450px) {
+  .student-info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+}
+
+.report-table th {
+  background: var(--brand-cyan-dark);
+}
+
+.report-summary-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: space-around;
+  background: var(--brand-navy);
+  color: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 20px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+
+@media (min-width: 450px) {
+  .report-summary-box {
+    flex-direction: row;
+  }
+}
+
+/* القائمة الجانبية للجوال */
+.top-mobile-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.side-menu-wrapper {
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu-toggle {
+  display: none;
+}
+
+.menu-overlay {
+  display: none;
+}
+
+/* تنسيق القوائم المنسدلة للأرشيف */
+.archive-dropdown {
+  padding: 8px 12px;
+  border: 1.5px solid var(--brand-cyan);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--brand-navy);
+  background-color: var(--brand-light);
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  max-width: 250px;
+  transition: all 0.3s ease;
+}
+
+.archive-dropdown:focus {
+  border-color: var(--brand-navy);
+  box-shadow: 0 0 5px rgba(0, 82, 136, 0.3);
+}
+
+.archived-grade {
+  font-weight: 700;
+  color: var(--brand-navy-dark);
+  background: #e2f1f8;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: inline-block;
+  min-width: 60px;
+  border: 1px dashed var(--border-color);
+  text-align: center;
+}
+
+/* ==========================================
+   الميديا كويري لتحسين تجربة الجوالات
+   ========================================== */
+@media (max-width: 768px) {
+  .header-container {
+    display: block;
+    padding: 10px 15px;
+  }
+
+  .top-mobile-bar {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .menu-toggle {
+    display: block;
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    color: var(--brand-navy);
+    cursor: pointer;
+    padding: 0 10px;
+  }
+
+  .side-menu-wrapper {
+    position: fixed;
+    top: 0;
+    right: -320px; /* تم تصحيحها لتدعم اللغة العربية */
+    width: 280px;
+    height: 100vh;
+    background: #ffffff;
+    z-index: 1000;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 30px 20px;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.15); /* تعديل الظل للاتجاه الصحيح */
+    transition: right 0.3s ease-in-out; /* تم التصحيح */
+    gap: 30px;
+    overflow-y: auto;
+  }
+
+  .side-menu-wrapper.open {
+    right: 0; /* تم التصحيح */
+  }
+
+  .menu-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 43, 73, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .menu-overlay.open {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .user-area {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 15px;
+  }
+
+  .user-area > * {
+    width: 100%;
+    text-align: right;
+  }
+  
+  /* تصغير المسافات العامة */
+  .container {
+    padding: 15px 10px;
+  }
+  .section-header {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  .class-card {
+    padding: 15px;
+  }
+  .class-card h3 {
+    font-size: 18px;
+  }
+  
+  /* تصغير قوائم الطلاب بشكل جذري للموبايل */
+  .grades-table th, .grades-table td {
+    padding: 6px 4px; /* تصغير الـ Padding */
+    font-size: 12px;
+  }
+  .student-name-col {
+    min-width: 110px; /* تصغير عرض عمود الاسم بشكل كبير */
+    font-size: 12px;
+    padding-right: 8px !important;
+  }
+  .grade-input {
+    width: 60px; /* تصغير حقل الإدخال ليتسع أكثر */
+    height: 32px;
+    font-size: 12px;
+  }
+  .btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+/* الجوالات الصغيرة جداً */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 25px 20px;
+  }
+  .login-header h2 {
+    font-size: 19px;
+  }
+  .header-logo {
+    height: 45px;
+  }
+  
+  .admin-panel {
+    padding: 15px;
+  }
+  .admin-box {
+    padding: 12px;
+  }
+  
+  /* جعل الأزرار تأخذ المساحة الكاملة بشكل مريح */
+  .add-student-bar {
+    flex-direction: column;
+    width: 100%;
+  }
+  .add-student-bar input, .add-student-bar button {
+    width: 100%;
+    min-width: 100%;
+  }
+  
+  .add-sub-inline input {
+    min-width: 100%;
+  }
+  
+  .class-page-actions {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+  }
+  
+  .db-actions .btn {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .school-titles h1 {
+    font-size: 17px;
+  }
+  .admin-panel-header h3 {
+    font-size: 16px;
+  }
+  .subject-checkbox-label {
+    flex: 1 1 100%;
+  }
+}
