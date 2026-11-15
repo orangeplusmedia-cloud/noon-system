@@ -972,7 +972,7 @@ function renderStudentsTable() {
                       placeholder="درجة أو تقدير"
                       value="${val}" 
                       ${disabledAttr}
-                      oninput="updateGrade(${student.id}, ${i}, this.value)"
+                      onchange="updateGrade(${student.id}, ${i}, this.value)"
                   >
               </td>
           `;
