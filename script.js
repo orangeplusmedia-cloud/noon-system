@@ -740,7 +740,10 @@ function renderTeachersListForAdmin() {
               <strong>👨‍🏫 ${t.username}</strong> (${t.password})<br>
               <small><b>الصفة:</b> ${t.title || "غير محدد"} | <b>المواد المسموحة:</b> ${subsText}</small>
             </div>
-            <button class="delete-teacher-btn" onclick="deleteTeacher('${t.username}')">×</button>
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <button class="btn btn-warning btn-sm" style="background-color: #f39c12; color: white; border: none; padding: 4px 8px; cursor: pointer; border-radius: 4px;" onclick="editTeacherData('${t.username}')">تعديل</button>
+                <button class="delete-teacher-btn" onclick="deleteTeacher('${t.username}')">×</button>
+            </div>
         `;
       listContainer.appendChild(chip);
     });
@@ -778,6 +781,34 @@ window.deleteTeacher = function (username) {
   if (!confirm(`هل أنت متأكد من حذف حساب المعلم (${username})؟`)) return;
 
   db.users = db.users.filter((u) => !(u.username === username && u.role === "teacher"));
+  saveDatabase();
+  renderTeachersListForAdmin();
+};
+
+window.editTeacherData = function (username) {
+  if (!isAdmin()) return;
+  const teacher = db.users.find((u) => u.username === username && u.role === "teacher");
+  if (!teacher) return;
+
+  const newUsername = prompt("تعديل اسم المستخدم:", teacher.username);
+  if (!newUsername || newUsername.trim() === "") return;
+  
+  if (newUsername !== teacher.username && db.users.some((u) => u.username === newUsername.trim())) {
+    alert("اسم المستخدم موجود مسبقاً!");
+    return;
+  }
+
+  const newPassword = prompt("تعديل كلمة المرور:", teacher.password);
+  if (!newPassword || newPassword.trim() === "") return;
+
+  const newTitle = prompt("تعديل صفة المعلم:", teacher.title);
+  if (!newTitle || newTitle.trim() === "") return;
+
+  // حفظ التعديلات
+  teacher.username = newUsername.trim();
+  teacher.password = newPassword.trim();
+  teacher.title = newTitle.trim();
+
   saveDatabase();
   renderTeachersListForAdmin();
 };
@@ -985,6 +1016,7 @@ function renderStudentsTable() {
         <td>
           <div class="admin-row-actions">
             <button class="btn btn-cyan btn-sm" onclick="transferStudent(${student.id})" title="نقل الطالب إلى صف آخر">نقل</button>
+            <button class="btn btn-warning btn-sm" style="background-color: #f39c12; color: #fff; border:none; border-radius:3px; padding:3px 6px;" onclick="editStudentName(${student.id})" title="تعديل اسم الطالب">تعديل</button>
             <button class="btn btn-danger btn-sm" onclick="deleteStudent(${student.id})">حذف</button>
           </div>
         </td>
@@ -1027,8 +1059,13 @@ window.updateGrade = function (studentId, subjectIndex, value) {
   if (cleanValue !== "") {
     if (!isNaN(cleanValue)) {
       let num = Number(cleanValue);
-      if (num > 100) num = 100;
-      if (num < 0) num = 0;
+      // التعديل: فحص إذا كان الصف يحتوي على كلمة "السابع"
+      if (currentClass.name.includes("السابع")) {
+         if (num < 0) num = 0;
+      } else {
+         if (num > 100) num = 100;
+         if (num < 0) num = 0;
+      }
       cleanValue = num;
     }
   }
@@ -1108,6 +1145,20 @@ window.deleteStudent = function (studentId) {
   currentClass.students = currentClass.students.filter((s) => s.id !== studentId);
   saveDatabase();
   renderStudentsTable();
+};
+
+window.editStudentName = function (studentId) {
+  if (!isAdmin()) return;
+  const currentClass = db.classes.find((c) => c.id === selectedClassId);
+  const student = currentClass.students.find((s) => s.id === studentId);
+  if (!student) return;
+
+  const newName = prompt("أدخل الاسم الجديد للطالب:", student.name);
+  if (newName && newName.trim() !== "") {
+    student.name = newName.trim();
+    saveDatabase();
+    renderStudentsTable();
+  }
 };
 
 document.getElementById("back-to-classes-btn").addEventListener("click", function () {
