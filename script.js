@@ -402,6 +402,14 @@ function canEditSubject(subjectName) {
   return teacherObj.allowedSubjects.includes(subjectName);
 }
 
+// تحديد العلامة العظمى لكل صف (50 لجميع الصفوف عدا السابع 100)
+function getMaxGradeForClass(cls) {
+  if (cls && cls.name && cls.name.includes("السابع")) {
+    return 100;
+  }
+  return 50;
+}
+
 // ==========================================
 // 6. تسجيل دخول الموظفين والاستعلام للطلاب
 // ==========================================
@@ -821,7 +829,7 @@ function buildClassSheetData(cls) {
   const rows = [headerRow];
 
   cls.students.forEach((student, idx) => {
-    const { total, avg } = calculateStudentStats(student.grades);
+    const { total, avg } = calculateStudentStats(student.grades, cls);
     const gradesRow = [];
     cls.subjects.forEach((_, i) => {
       gradesRow.push(student.grades[i] !== "" && student.grades[i] !== undefined ? student.grades[i] : "");
@@ -981,7 +989,7 @@ function renderStudentsTable() {
 
   currentClass.students.forEach((student, index) => {
     const tr = document.createElement("tr");
-    const { total, avg } = calculateStudentStats(student.grades);
+    const { total, avg } = calculateStudentStats(student.grades, currentClass);
 
     let inputsHTML = "";
     currentClass.subjects.forEach((subj, i) => {
@@ -1003,7 +1011,7 @@ function renderStudentsTable() {
                       placeholder="درجة أو تقدير"
                       value="${val}" 
                       ${disabledAttr}
-                      onchange="updateGrade(${student.id}, ${i}, this.value)"
+                      onchange="updateGrade(${student.id}, ${i}, this.value, this)"
                   >
               </td>
           `;
@@ -1050,7 +1058,7 @@ function parseGradeValue(val) {
   return isNaN(parsed) ? 0 : parsed;
 }
 
-window.updateGrade = function (studentId, subjectIndex, value) {
+window.updateGrade = function (studentId, subjectIndex, value, inputEl) {
   const currentClass = db.classes.find((c) => c.id === selectedClassId);
   const student = currentClass.students.find((s) => s.id === studentId);
   if (!student) return;
@@ -1059,30 +1067,34 @@ window.updateGrade = function (studentId, subjectIndex, value) {
   if (cleanValue !== "") {
     if (!isNaN(cleanValue)) {
       let num = Number(cleanValue);
-      // التعديل: فحص إذا كان الصف يحتوي على كلمة "السابع"
+      // فحص إذا كان الصف يحتوي على كلمة "السابع"
       if (currentClass.name.includes("السابع")) {
          if (num < 0) num = 0;
       } else {
-         if (num > 100) num = 100;
+         if (num > 50) num = 50;
          if (num < 0) num = 0;
       }
       cleanValue = num;
     }
   }
 
+  if (inputEl) {
+    inputEl.value = cleanValue;
+  }
+
   student.grades[subjectIndex] = cleanValue;
   saveDatabase();
 
-  const { total, avg } = calculateStudentStats(student.grades);
+  const { total, avg } = calculateStudentStats(student.grades, currentClass);
   document.getElementById(`total-${studentId}`).textContent = total;
   document.getElementById(`avg-${studentId}`).textContent = `${avg}%`;
 };
 
-function calculateStudentStats(grades) {
+function calculateStudentStats(grades, cls) {
   let total = 0;
   let enteredCount = 0;
 
-  if (!grades) return { total: 0, avg: "0.0" };
+  if (!grades || grades.length === 0) return { total: 0, avg: "0.0" };
 
   grades.forEach((g) => {
     if (g !== "" && g !== undefined && g !== null) {
@@ -1094,7 +1106,10 @@ function calculateStudentStats(grades) {
     }
   });
 
-  const avg = enteredCount > 0 ? (total / grades.length).toFixed(1) : "0.0";
+  const maxGrade = getMaxGradeForClass(cls);
+  const subjectsCount = (cls && cls.subjects && cls.subjects.length > 0) ? cls.subjects.length : grades.length;
+  const maxTotal = subjectsCount * maxGrade;
+  const avg = (enteredCount > 0 && maxTotal > 0) ? ((total / maxTotal) * 100).toFixed(1) : "0.0";
   return { total, avg };
 }
 
@@ -1215,8 +1230,9 @@ function renderStudentReportPage(student, cls) {
     tbody.appendChild(tr);
   });
 
-  const { total, avg } = calculateStudentStats(student.grades);
-  const maxPoints = cls.subjects.length * 100;
+  const { total, avg } = calculateStudentStats(student.grades, cls);
+  const maxGrade = getMaxGradeForClass(cls);
+  const maxPoints = cls.subjects.length * maxGrade;
   document.getElementById("rep-total").textContent = `${total} / ${maxPoints}`;
   document.getElementById("rep-avg").textContent = `${avg}%`;
 }
