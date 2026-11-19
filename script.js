@@ -301,6 +301,8 @@ let currentUser = null;
 let selectedClassId = null;
 let currentViewingArchiveId = null;
 let currentStudentReport = null;
+let isSyncedWithFirebase = false;
+let lastRenderedTableKey = "";
 
 // ==========================================
 // 3. عناصر واجهة المستخدم
@@ -333,6 +335,7 @@ const currentClassTitle = document.getElementById("current-class-title");
 database.ref("school_db").on("value", (snapshot) => {
   const data = snapshot.val();
   if (data) {
+    isSyncedWithFirebase = true;
     db = data;
     if (!db.archives) db.archives = []; // التأكد من وجود مصفوفة الأرشيف
     
@@ -346,6 +349,13 @@ database.ref("school_db").on("value", (snapshot) => {
       
       cls.students.forEach((st, sIdx) => {
         if (!st.code) st.code = `ST${cIdx + 1}0${sIdx + 1}`;
+        // ضمان بقاء مصفوفة العلامات منتظمة حتى مع التحديثات الجزئية المتزامنة
+        const normalizedGrades = [];
+        for (let i = 0; i < cls.subjects.length; i++) {
+          const g = st.grades ? st.grades[i] : "";
+          normalizedGrades.push(g !== undefined && g !== null ? g : "");
+        }
+        st.grades = normalizedGrades;
       });
     });
 
@@ -356,12 +366,12 @@ database.ref("school_db").on("value", (snapshot) => {
     });
   }
 
-  // تحديث الواجهة تلقائياً
+  // تحديث الواجهة تلقائياً دون مقاطعة المعلم أثناء الكتابة
   if (currentUser) {
     if (classesPage && !classesPage.classList.contains("hidden")) {
       renderClassesList();
     } else if (studentsPage && !studentsPage.classList.contains("hidden")) {
-      renderStudentsTable();
+      updateStudentsTableSmartly();
     } else if (adminDashboardPage && !adminDashboardPage.classList.contains("hidden")) {
       renderTeachersListForAdmin();
       renderTeacherSubjectsCheckboxes();
@@ -382,10 +392,19 @@ function saveDatabase() {
 
 function showSaveIndicator() {
   const badge = document.getElementById("save-status");
+  if (!badge) return;
   badge.textContent = "⏳ جاري الحفظ...";
   setTimeout(() => {
     badge.textContent = "✓ تم الحفظ في قاعدة البيانات";
   }, 300);
+}
+
+// تحديد العلامة العظمى لكل صف (50 لجميع الصفوف عدا الصف السابع 100)
+function getMaxGradeForClass(cls) {
+  if (cls && cls.name && cls.name.includes("السابع")) {
+    return 100;
+  }
+  return 50;
 }
 
 function isAdmin() {
@@ -400,14 +419,6 @@ function canEditSubject(subjectName) {
     return true;
   }
   return teacherObj.allowedSubjects.includes(subjectName);
-}
-
-// تحديد العلامة العظمى لكل صف (50 لجميع الصفوف عدا السابع 100)
-function getMaxGradeForClass(cls) {
-  if (cls && cls.name && cls.name.includes("السابع")) {
-    return 100;
-  }
-  return 50;
 }
 
 // ==========================================
@@ -968,22 +979,70 @@ function renderTableHeaders(currentClass, isArchiveView) {
     `;
 }
 
+function getTableStructureKey(currentClass, isArchiveView) {
+  if (!currentClass) return "";
+  const subjKey = (currentClass.subjects || []).join("|");
+  const studKey = (currentClass.students || []).map((s) => `${s.id}:${s.name}:${s.code}`).join("|");
+  return `${selectedClassId}::${isArchiveView}::${subjKey}::${studKey}`;
+}
+
+function updateStudentsTableSmartly() {
+  const isArchiveView = currentViewingArchiveId !== null;
+  if (isArchiveView) {
+    renderStudentsTable();
+    return;
+  }
+
+  const currentClass = db.classes.find((c) => c.id === selectedClassId);
+  if (!currentClass) {
+    renderStudentsTable();
+    return;
+  }
+
+  const currentKey = getTableStructureKey(currentClass, false);
+  if (currentKey !== lastRenderedTableKey) {
+    renderStudentsTable();
+    return;
+  }
+
+  // تحديث القيم المتغيرة في مكانها فقط دون إعادة بناء الجدول أو قطع كتابة المعلم
+  currentClass.students.forEach((student) => {
+    currentClass.subjects.forEach((_, i) => {
+      const inputEl = document.getElementById(`grade-${student.id}-${i}`);
+      if (inputEl && document.activeElement !== inputEl) {
+        const val = student.grades[i] !== undefined ? student.grades[i] : "";
+        if (String(inputEl.value) !== String(val)) {
+          inputEl.value = val;
+        }
+      }
+    });
+
+    const { total, avg } = calculateStudentStats(student.grades, currentClass);
+    const totalEl = document.getElementById(`total-${student.id}`);
+    const avgEl = document.getElementById(`avg-${student.id}`);
+    if (totalEl) totalEl.textContent = total;
+    if (avgEl) avgEl.textContent = `${avg}%`;
+  });
+}
+
 function renderStudentsTable() {
   const isArchiveView = currentViewingArchiveId !== null;
   let currentClass;
   
   if (isArchiveView) {
       const archive = db.archives.find(a => a.id === currentViewingArchiveId);
-      currentClass = archive.classes.find(c => c.id === selectedClassId);
+      currentClass = archive ? archive.classes.find(c => c.id === selectedClassId) : null;
   } else {
       currentClass = db.classes.find(c => c.id === selectedClassId);
   }
 
   if (!currentClass || !currentClass.students || currentClass.students.length === 0) {
+      lastRenderedTableKey = "";
       studentsTableBody.innerHTML = "<tr><td colspan='100%'>لا توجد بيانات طلاب لهذا الصف حالياً.</td></tr>";
       return;
   }
 
+  lastRenderedTableKey = getTableStructureKey(currentClass, isArchiveView);
   renderTableHeaders(currentClass, isArchiveView);
   studentsTableBody.innerHTML = "";
 
@@ -1006,6 +1065,7 @@ function renderStudentsTable() {
               <td>
                   <input 
                       type="text" 
+                      id="grade-${student.id}-${i}"
                       list="estimations-list"
                       class="grade-input ${disabledClass}" 
                       placeholder="درجة أو تقدير"
@@ -1059,9 +1119,13 @@ function parseGradeValue(val) {
 }
 
 window.updateGrade = function (studentId, subjectIndex, value, inputEl) {
-  const currentClass = db.classes.find((c) => c.id === selectedClassId);
-  const student = currentClass.students.find((s) => s.id === studentId);
-  if (!student) return;
+  const classIndex = db.classes.findIndex((c) => c.id === selectedClassId);
+  if (classIndex === -1) return;
+  const currentClass = db.classes[classIndex];
+
+  const studentIndex = currentClass.students.findIndex((s) => s.id === studentId);
+  if (studentIndex === -1) return;
+  const student = currentClass.students[studentIndex];
 
   let cleanValue = value.trim();
   if (cleanValue !== "") {
@@ -1069,10 +1133,10 @@ window.updateGrade = function (studentId, subjectIndex, value, inputEl) {
       let num = Number(cleanValue);
       // فحص إذا كان الصف يحتوي على كلمة "السابع"
       if (currentClass.name.includes("السابع")) {
-         if (num < 0) num = 0;
+        if (num < 0) num = 0;
       } else {
-         if (num > 50) num = 50;
-         if (num < 0) num = 0;
+        if (num > 50) num = 50;
+        if (num < 0) num = 0;
       }
       cleanValue = num;
     }
@@ -1082,8 +1146,25 @@ window.updateGrade = function (studentId, subjectIndex, value, inputEl) {
     inputEl.value = cleanValue;
   }
 
+  if (!student.grades) {
+    student.grades = new Array(currentClass.subjects.length).fill("");
+  }
   student.grades[subjectIndex] = cleanValue;
-  saveDatabase();
+
+  // حفظ العلامة في مسارها المحدد فقط لمنع التضارب عند إدخال أكثر من معلم في نفس الوقت
+  if (isSyncedWithFirebase) {
+    database
+      .ref(`school_db/classes/${classIndex}/students/${studentIndex}/grades/${subjectIndex}`)
+      .set(cleanValue)
+      .then(() => {
+        showSaveIndicator();
+      })
+      .catch((error) => {
+        alert("حدث خطأ أثناء حفظ العلامة: " + error.message);
+      });
+  } else {
+    saveDatabase();
+  }
 
   const { total, avg } = calculateStudentStats(student.grades, currentClass);
   document.getElementById(`total-${studentId}`).textContent = total;
